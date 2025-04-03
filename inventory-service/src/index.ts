@@ -1,6 +1,6 @@
 import express from "express";
 //import cors from "cors";
-import inventoryRoutes from "./routes/inventoryRoutes";
+import inventoryRoutes from "./routes/InventoryRoutes";
 import dotenv from "dotenv";
 
 dotenv.config();
