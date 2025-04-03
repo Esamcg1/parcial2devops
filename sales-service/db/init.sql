@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS sales (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    productId INT NOT NULL,
+    quantity INT NOT NULL
+);

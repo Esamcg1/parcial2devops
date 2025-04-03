@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # base de datos PostgQL para Inventoryu Service
+  postgres-db:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: inventory_password
+      POSTGRES_DB: inventory_db
+    ports:
+      - "5432:5432"
+    networks:
+      - microservices-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./inventory-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  # Base de datos MySqL para sales servie
+  mysql-db:
+    image: mysql:latest
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sales_db
+      MYSQL_USER: sales_user
+      MYSQL_PASSWORD: sales_password
+    ports:
+      - "3306:3306"
+    networks:
+      - microservices-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sales-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  # microservicio de Inventario se conecta a postrgelsc
+  inventory-service:
+    build: ./inventory-service
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres-db
+    environment:
+      - PORT=3001
+      - DB_HOST=postgres-db
+      - DB_USER=inventory_user
+      - DB_PASSWORD=inventory_password
+      - DB_NAME=inventory_db
+    networks:
+      - microservices-network
+
+  # microserviio de ventas se conecta   a MySQL
+  sales-service:
+    build: ./sales-service
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mysql-db
+    environment:
+      - PORT=3002
+      - DB_HOST=mysql-db
+      - DB_USER=sales_user
+      - DB_PASSWORD=sales_password
+      - DB_NAME=sales_db
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mysql_data:
